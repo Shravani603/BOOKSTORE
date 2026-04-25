@@ -12,6 +12,7 @@ const { isLoggedIn, isOwner } = require('../middleware/auth');
 router.get('/books', async (req, res) => {
     try {
         const books = await book.find().sort({ createdAt: -1 });
+        console.log("BOOKS:", books); 
         res.render('books', { books });
     } catch (error) {
         console.error(error);
