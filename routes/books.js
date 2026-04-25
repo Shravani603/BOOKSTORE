@@ -12,14 +12,13 @@ const { isLoggedIn, isOwner } = require('../middleware/auth');
 router.get('/books', async (req, res) => {
     try {
         const books = await Book.find().sort({ createdAt: -1 });
-        console.log("BOOKS:", books); 
+        console.log("BOOKS:", books);
         res.render('books', { books });
     } catch (error) {
         console.error(error);
         res.redirect('/');
     }
 });
-
 
 // ➕ Show add book form
 router.get('/books/add', (req, res) => {
@@ -47,23 +46,24 @@ router.get('/books/search', async (req, res) => {
 // 📖 View single book details
 router.get('/books/:id', async (req, res) => {
     try {
-        const book = await Book.findById(req.params.id);
-        if (!book) {
-            return res.status(404).send('book not found');
+        // ✅ Fixed: renamed local var 'foundBook' to avoid shadowing the Book model
+        const foundBook = await Book.findById(req.params.id);
+        if (!foundBook) {
+            return res.status(404).send('Book not found');
         }
-        res.render('book-details', { book });
+        res.render('book-details', { book: foundBook });
     } catch (error) {
         console.error('Error loading book details:', error);
         res.status(500).send('Server Error');
     }
 });
 
-
 // 🆕 Add new book
 router.post('/books', isLoggedIn, async (req, res) => {
     try {
         const { title, author, isbn, price, category, description, stock, imageUrl } = req.body;
-        const newBook = new book({
+        // ✅ Fixed: was `new book(...)` (lowercase), now correctly `new Book(...)`
+        const newBook = new Book({
             title,
             author,
             isbn,
@@ -72,9 +72,8 @@ router.post('/books', isLoggedIn, async (req, res) => {
             description,
             stock: parseInt(stock),
             imageUrl: imageUrl || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300',
-
-            createdBy: req.session.user._id   // ⭐ ADD THIS LINE
-});
+            createdBy: req.session.user._id
+        });
 
         await newBook.save();
         res.redirect('/books');
@@ -85,11 +84,13 @@ router.post('/books', isLoggedIn, async (req, res) => {
 });
 
 // ✏️ Edit book form
-router.get('/books/edit/:id', isLoggedIn, isOwner(book), async (req, res) => {
+// ✅ Fixed: was isOwner(book) with lowercase — now isOwner(Book)
+router.get('/books/edit/:id', isLoggedIn, isOwner(Book), async (req, res) => {
     try {
-        const book = await Book.findById(req.params.id);
-        if (!book) return res.redirect('/books');
-        res.render('edit-book', { book });
+        // ✅ Fixed: renamed local var to avoid shadowing Book model
+        const foundBook = await Book.findById(req.params.id);
+        if (!foundBook) return res.redirect('/books');
+        res.render('edit-book', { book: foundBook });
     } catch (error) {
         console.error(error);
         res.redirect('/books');
@@ -97,7 +98,8 @@ router.get('/books/edit/:id', isLoggedIn, isOwner(book), async (req, res) => {
 });
 
 // 💾 Update book
-router.put('/books/:id', isLoggedIn, isOwner(book), async (req, res) => {
+// ✅ Fixed: was isOwner(book) with lowercase — now isOwner(Book)
+router.put('/books/:id', isLoggedIn, isOwner(Book), async (req, res) => {
     try {
         const { title, author, isbn, price, category, description, stock, imageUrl } = req.body;
         await Book.findByIdAndUpdate(req.params.id, {
@@ -118,7 +120,8 @@ router.put('/books/:id', isLoggedIn, isOwner(book), async (req, res) => {
 });
 
 // ❌ Delete book
-router.delete('/books/:id', isLoggedIn, isOwner(book), async (req, res) => {
+// ✅ Fixed: was isOwner(book) with lowercase — now isOwner(Book)
+router.delete('/books/:id', isLoggedIn, isOwner(Book), async (req, res) => {
     try {
         await Book.findByIdAndDelete(req.params.id);
         res.redirect('/books');
@@ -127,7 +130,6 @@ router.delete('/books/:id', isLoggedIn, isOwner(book), async (req, res) => {
         res.redirect('/books');
     }
 });
-
 
 
 // 📞 Contact Us page
@@ -168,7 +170,7 @@ router.post('/feedback', isLoggedIn, async (req, res) => {
             rating,
             bookTitle,
             review,
-            user: req.session.user._id   // ⭐ ADD THIS
+            user: req.session.user._id
         });
         await newFeedback.save();
         res.redirect('/feedback');
@@ -178,7 +180,7 @@ router.post('/feedback', isLoggedIn, async (req, res) => {
     }
 });
 
-// edit feedback page
+// ✏️ Edit feedback page
 router.get('/feedback/edit/:id', isLoggedIn, async (req, res) => {
     const feedback = await Feedback.findById(req.params.id);
 
@@ -194,7 +196,7 @@ router.get('/feedback/edit/:id', isLoggedIn, async (req, res) => {
     res.render('edit-feedback', { feedback });
 });
 
-// update 
+// 💾 Update feedback
 router.put('/feedback/:id', isLoggedIn, async (req, res) => {
     const feedback = await Feedback.findById(req.params.id);
 
@@ -209,8 +211,7 @@ router.put('/feedback/:id', isLoggedIn, async (req, res) => {
     res.redirect('/feedback');
 });
 
-
-//DELETE
+// 🗑️ Delete feedback
 router.delete('/feedback/:id', isLoggedIn, async (req, res) => {
     const feedback = await Feedback.findById(req.params.id);
 
@@ -244,7 +245,7 @@ router.get('/categories', async (req, res) => {
     }
 });
 
-// 📗 Books by category (Fix for slashes or spaces)
+// 📗 Books by category
 router.get('/categories/:category', async (req, res) => {
     try {
         const category = decodeURIComponent(req.params.category);
@@ -262,8 +263,6 @@ router.get('/about', (req, res) => {
 });
 
 
-
-
 // 🛒 View Cart
 router.get('/cart', (req, res) => {
     const cart = req.session.cart || [];
@@ -273,11 +272,12 @@ router.get('/cart', (req, res) => {
 // 🛒 Add book to cart
 router.post('/books/:id/buy', isLoggedIn, async (req, res) => {
     try {
-        const book = await Book.findById(req.params.id);
-        if (!book) return res.status(404).send('Book not found');
+        // ✅ Fixed: renamed local var to avoid shadowing Book model
+        const foundBook = await Book.findById(req.params.id);
+        if (!foundBook) return res.status(404).send('Book not found');
 
         if (!req.session.cart) req.session.cart = [];
-        req.session.cart.push(book);
+        req.session.cart.push(foundBook);
 
         res.redirect('/cart');
     } catch (error) {
@@ -294,29 +294,26 @@ router.post('/cart/remove/:index', (req, res) => {
     res.redirect('/cart');
 });
 
-// ✅ Step 1: Go to checkout page (DO NOT clear cart here)
+// ✅ Step 1: Go to checkout page
 router.post('/cart/checkout', (req, res) => {
     const cart = req.session.cart || [];
     res.render('checkout', { cart });
 });
 
-// ✅ Step 2: Place order (NOW clear cart)
+// ✅ Step 2: Place order
 router.post('/place-order', async (req, res) => {
     try {
         const { name, phone, address, payment } = req.body;
         const cart = req.session.cart || [];
 
-        // Prepare items
-        const items = cart.map(book => ({
-            title: book.title,
-            price: book.price,
+        const items = cart.map(b => ({
+            title: b.title,
+            price: b.price,
             quantity: 1
         }));
 
-        // Calculate total
         const totalAmount = cart.reduce((sum, b) => sum + b.price, 0);
 
-        // Save order
         const newOrder = new Order({
             name,
             phone,
@@ -328,9 +325,7 @@ router.post('/place-order', async (req, res) => {
 
         await newOrder.save();
 
-        // Clear cart AFTER saving
         req.session.cart = [];
-
         res.render('checkout-success');
 
     } catch (error) {
@@ -343,8 +338,6 @@ router.get('/orders', async (req, res) => {
     const orders = await Order.find().sort({ createdAt: -1 });
     res.render('orders', { orders });
 });
-
-
 
 
 module.exports = router;

@@ -3,13 +3,10 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const path = require('path');
-const session = require('express-session'); // ✅ Only one declaration
+const session = require('express-session');
 const app = express();
-const book = require('./models/Book');
+const Book = require('./models/Book');
 require("dotenv").config();
-
-
-// MongoDB Connection -  database
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -21,7 +18,6 @@ mongoose.connect(process.env.MONGO_URI, {
     console.error("❌ MongoDB Connection Failed:", err);
 });
 
-// Check connection
 const db = mongoose.connection;
 
 db.on('error', (error) => {
@@ -30,7 +26,7 @@ db.on('error', (error) => {
 
 db.once('open', function() {
     console.log('✅ Connected to MongoDB successfully!');
-    console.log('📚 Database: bookstore');
+    console.log('📚 Database: Bookstore');
 });
 
 // Middleware
@@ -40,23 +36,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
-// ✅ Session middleware (only once, here)
+// Session middleware
 app.use(session({
     secret: 'bookstore',
     resave: false,
     saveUninitialized: true
 }));
 
-app.use((req, res, next) => {
-    res.locals.currentUser = req.session.user;
-    next();
-});
-
+// ✅ Single currentUser middleware (removed duplicate)
 app.use((req, res, next) => {
     res.locals.currentUser = req.session.user || null;
     next();
 });
-
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -70,54 +61,25 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-// Start server
-const PORT = 3000;
+// ✅ Fixed PORT for Render deployment
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📚 Online Bookstore is ready!`);
 });
 
-
-// html
+// HTML mobile route
 app.get('/mobile', (req, res) => {
     res.sendFile(__dirname + '/public/mobile.html');
 });
 
-// GET all books (API)
+// ✅ Fixed: renamed local var to avoid shadowing Book model
 app.get('/api/books', async (req, res) => {
-    const books = await book.find();
+    const books = await Book.find();
     res.json(books);
 });
 
-// GET single book
 app.get('/api/books/:id', async (req, res) => {
-    const book = await book.findById(req.params.id);
-    res.json(book);
+    const foundBook = await Book.findById(req.params.id);
+    res.json(foundBook);
 });
-
-
-// cart
-app.post('/cart/checkout', (req, res) => {
-    res.render('checkout');
-});
-
-app.get('/cart', (req, res) => {
-    res.render('cart', { cart: req.session.cart || [] });
-});
-
-
-app.post('/place-order', (req, res) => {
-    const { name, phone, address, payment } = req.body;
-
-    console.log({ name, phone, address, payment });
-
-    // You can later save this in DB
-    res.send("✅ Order placed successfully!");
-});
-
-
-
-
-
-
-
