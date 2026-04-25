@@ -5,7 +5,7 @@ const methodOverride = require('method-override');
 const path = require('path');
 const session = require('express-session'); // ✅ Only one declaration
 const app = express();
-const Book = require('./models/Book');
+const book = require('./models/book');
 require("dotenv").config();
 
 
@@ -85,13 +85,13 @@ app.get('/mobile', (req, res) => {
 
 // GET all books (API)
 app.get('/api/books', async (req, res) => {
-    const books = await Book.find();
+    const books = await book.find();
     res.json(books);
 });
 
 // GET single book
 app.get('/api/books/:id', async (req, res) => {
-    const book = await Book.findById(req.params.id);
+    const book = await book.findById(req.params.id);
     res.json(book);
 });
 

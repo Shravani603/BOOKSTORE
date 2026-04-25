@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Book = require('../models/Book');
+const book = require('../models/Book');
 const Feedback = require('../models/Feedback');
 const Contact = require('../models/Contact');
 const Order = require('../models/Order');
@@ -11,7 +11,7 @@ const { isLoggedIn, isOwner } = require('../middleware/auth');
 // 📚 Get all books
 router.get('/books', async (req, res) => {
     try {
-        const books = await Book.find().sort({ createdAt: -1 });
+        const books = await book.find().sort({ createdAt: -1 });
         res.render('books', { books });
     } catch (error) {
         console.error(error);
@@ -29,7 +29,7 @@ router.get('/books/add', (req, res) => {
 router.get('/books/search', async (req, res) => {
     try {
         const query = req.query.q;
-        const books = await Book.find({
+        const books = await book.find({
             $or: [
                 { title: { $regex: query, $options: 'i' } },
                 { author: { $regex: query, $options: 'i' } },
@@ -46,9 +46,9 @@ router.get('/books/search', async (req, res) => {
 // 📖 View single book details
 router.get('/books/:id', async (req, res) => {
     try {
-        const book = await Book.findById(req.params.id);
+        const book = await book.findById(req.params.id);
         if (!book) {
-            return res.status(404).send('Book not found');
+            return res.status(404).send('book not found');
         }
         res.render('book-details', { book });
     } catch (error) {
@@ -62,7 +62,7 @@ router.get('/books/:id', async (req, res) => {
 router.post('/books', isLoggedIn, async (req, res) => {
     try {
         const { title, author, isbn, price, category, description, stock, imageUrl } = req.body;
-        const newBook = new Book({
+        const newBook = new book({
             title,
             author,
             isbn,
@@ -84,9 +84,9 @@ router.post('/books', isLoggedIn, async (req, res) => {
 });
 
 // ✏️ Edit book form
-router.get('/books/edit/:id', isLoggedIn, isOwner(Book), async (req, res) => {
+router.get('/books/edit/:id', isLoggedIn, isOwner(book), async (req, res) => {
     try {
-        const book = await Book.findById(req.params.id);
+        const book = await book.findById(req.params.id);
         if (!book) return res.redirect('/books');
         res.render('edit-book', { book });
     } catch (error) {
@@ -96,10 +96,10 @@ router.get('/books/edit/:id', isLoggedIn, isOwner(Book), async (req, res) => {
 });
 
 // 💾 Update book
-router.put('/books/:id', isLoggedIn, isOwner(Book), async (req, res) => {
+router.put('/books/:id', isLoggedIn, isOwner(book), async (req, res) => {
     try {
         const { title, author, isbn, price, category, description, stock, imageUrl } = req.body;
-        await Book.findByIdAndUpdate(req.params.id, {
+        await book.findByIdAndUpdate(req.params.id, {
             title,
             author,
             isbn,
@@ -117,9 +117,9 @@ router.put('/books/:id', isLoggedIn, isOwner(Book), async (req, res) => {
 });
 
 // ❌ Delete book
-router.delete('/books/:id', isLoggedIn, isOwner(Book), async (req, res) => {
+router.delete('/books/:id', isLoggedIn, isOwner(book), async (req, res) => {
     try {
-        await Book.findByIdAndDelete(req.params.id);
+        await book.findByIdAndDelete(req.params.id);
         res.redirect('/books');
     } catch (error) {
         console.error(error);
