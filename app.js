@@ -5,7 +5,7 @@ const methodOverride = require('method-override');
 const path = require('path');
 const session = require('express-session'); // ✅ Only one declaration
 const app = express();
-const book = require('./models/book');
+const book = require('./models/Book');
 require("dotenv").config();
 
 
