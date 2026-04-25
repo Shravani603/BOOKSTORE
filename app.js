@@ -6,22 +6,28 @@ const path = require('path');
 const session = require('express-session'); // ✅ Only one declaration
 const app = express();
 const Book = require('./models/Book');
+require("dotenv").config();
 
 
+// MongoDB Connection -  database
 
-// MongoDB Connection - local database
-const MONGODB_URI = 'mongodb://localhost:27017/bookstore';
-
-mongoose.connect(MONGODB_URI, {
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
+})
+.then(() => console.log("✅ MongoDB Connected"))
+.catch(err => {
+    console.error("❌ MongoDB Connection Failed:", err);
 });
 
 // Check connection
 const db = mongoose.connection;
+
 db.on('error', (error) => {
     console.error('❌ MongoDB connection error:', error);
 });
+
 db.once('open', function() {
     console.log('✅ Connected to MongoDB successfully!');
     console.log('📚 Database: bookstore');
