@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mobile Bookstore</title>
+
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+<!-- HOME PAGE -->
+<div data-role="page" id="home">
+
+    <div data-role="header" data-theme="b">
+        <h1>📚 Bookstore</h1>
+    </div>
+
+    <div data-role="content">
+
+        <input type="text" id="search" placeholder="Search books...">
+
+        <ul id="bookList" data-role="listview" data-filter="true"></ul>
+
+    </div>
+
+</div>
+
+
+<!-- BOOK DETAILS PAGE -->
+<div data-role="page" id="details">
+
+    <div data-role="header" data-theme="b">
+        <a href="#home" data-icon="back">Back</a>
+        <h1>Book Details</h1>
+    </div>
+
+    <div data-role="content" id="bookDetails"></div>
+
+</div>
+
+
+<script>
+
+// LOAD BOOKS
+$(document).on("pagecreate", "#home", function () {
+    $.get('/api/books', function (books) {
+
+        let html = "";
+
+        books.forEach(book => {
+            html += `
+                <li>
+                    <a href="#details" onclick="loadDetails('${book._id}')">
+                        <h2>${book.title}</h2>
+                        <p>${book.author}</p>
+                        <p>₹${book.price}</p>
+                    </a>
+                </li>
+            `;
+        });
+
+        $("#bookList").html(html).listview("refresh");
+    });
+});
+
+
+// LOAD BOOK DETAILS
+function loadDetails(id) {
+    $.get('/api/books/' + id, function (book) {
+
+        let html = `
+            <h2>${book.title}</h2>
+            <p><b>Author:</b> ${book.author}</p>
+            <p><b>Price:</b> ₹${book.price}</p>
+            <p>${book.description}</p>
+
+            <button onclick="addToCart('${book._id}')">
+                🛒 Add to Cart
+            </button>
+        `;
+
+        $("#bookDetails").html(html);
+    });
+}
+
+
+// ADD TO CART (simple local storage)
+function addToCart(id) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.push(id);
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    alert("Book added to cart!");
+}
+
+</script>
+
+</body>
+</html>

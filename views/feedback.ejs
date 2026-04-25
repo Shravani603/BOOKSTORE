@@ -1,0 +1,100 @@
+<%- include('partials/header') %>
+
+<div class="page-header">
+    <h1>Customer Feedback</h1>
+    <p>Share your experience with us</p>
+</div>
+
+<div class="feedback-container">
+
+    <!-- LEFT: FORM -->
+    <div class="feedback-form">
+        <h2>Leave Your Review</h2>
+
+        <form action="/feedback" method="POST">
+            <div class="form-group">
+                <label>Your Name:</label>
+                <input type="text" name="customerName" required>
+            </div>
+
+            <div class="form-group">
+                <label>Rating:</label>
+                <select name="rating" required>
+                    <option value="">Select Rating</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                    <option value="4">⭐⭐⭐⭐ Very Good</option>
+                    <option value="3">⭐⭐⭐ Good</option>
+                    <option value="2">⭐⭐ Fair</option>
+                    <option value="1">⭐ Poor</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Book Title (Optional):</label>
+                <input type="text" name="bookTitle">
+            </div>
+
+            <div class="form-group">
+                <label>Your Review:</label>
+                <textarea name="review" rows="4" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+    </div>
+
+
+    <!-- RIGHT: REVIEWS -->
+    <div class="reviews-section">
+        <h2>What Our Customers Say</h2>
+
+        <div class="reviews-grid">
+
+            <% if (feedbacks.length > 0) { %>
+
+                <% feedbacks.forEach(fb => { %>
+
+                    <div class="review-card">
+
+                        <div class="review-header">
+                            <h4><%= fb.bookTitle || 'General Feedback' %></h4>
+                            <div class="rating">
+                                <%= '⭐'.repeat(fb.rating) %>
+                            </div>
+                        </div>
+
+                        <p>"<%= fb.review %>"</p>
+                        <div class="review-author">- <%= fb.customerName %></div>
+
+                        <% if (
+                            currentUser &&
+                            (currentUser.role === 'admin' ||
+                            (fb.user && currentUser._id.toString() === fb.user.toString()))
+                        ) { %>
+
+                            <div class="book-actions">
+                                <a href="/feedback/edit/<%= fb._id %>" class="btn btn-edit">Edit</a>
+
+                                <form action="/feedback/<%= fb._id %>?_method=DELETE" method="POST">
+                                    <button class="btn btn-delete">Delete</button>
+                                </form>
+                            </div>
+
+                        <% } %>
+
+                    </div>
+
+                <% }) %>
+
+            <% } else { %>
+
+                <p>No feedback yet. Be the first to share your thoughts!</p>
+
+            <% } %>
+
+        </div>
+    </div>
+
+</div>
+
+<%- include('partials/footer') %>

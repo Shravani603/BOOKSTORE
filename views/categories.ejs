@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+    <div class="page-header">
+        <h1>Book Categories</h1>
+        <p>Browse books by your favorite genres</p>
+    </div>
+
+    <div class="categories-container">
+        <% if (categories.length > 0) { %>
+            <% categories.forEach(category => { %>
+                <div class="category-section">
+                    <h2 class="category-title"><%= category %></h2>
+                    <div class="books-grid">
+                        <% if (booksByCategory[category] && booksByCategory[category].length > 0) { %>
+                            <% booksByCategory[category].forEach(book => { %>
+                                <div class="book-card">
+                                    <img src="<%= book.imageUrl %>" alt="<%= book.title %>" class="book-image">
+                                    <div class="book-info">
+                                        <h3 class="book-title"><%= book.title %></h3>
+                                        <p class="book-author">By <%= book.author %></p>
+                                        <p class="book-price">₹<%= book.price.toFixed(2) %></p>
+                                        <a href="/categories/<%= encodeURIComponent(category) %>" class="btn btn-primary">View Details</a>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="no-books">No books in this category yet.</p>
+                        <% } %>
+                    </div>
+                    <div class="category-footer">
+                        <a href="/categories/<%= category %>" class="btn btn-secondary">View All <%= category %> Books</a>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="no-categories">
+                <h3>No categories available yet</h3>
+                <p><a href="/books/add">Add some books to get started</a></p>
+            </div>
+        <% } %>
+    </div>
+<%- include('partials/footer') %>

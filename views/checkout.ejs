@@ -1,0 +1,126 @@
+<%- include('partials/header') %>
+
+<div class="container checkout-container">
+
+
+<h1 class="checkout-title">🧾 Checkout</h1>
+
+<div class="checkout-grid">
+
+    <!-- LEFT: USER DETAILS -->
+    <div class="checkout-form-box">
+        <h3>Shipping Details</h3>
+
+        <form action="/place-order" method="POST">
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="Enter your name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" name="phone" placeholder="Enter phone number" required>
+            </div>
+
+            <div class="form-group">
+                <label>Address</label>
+                <textarea name="address" placeholder="Enter full address" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select name="payment" required>
+                    <option value="COD">Cash on Delivery</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Card">Credit/Debit Card</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success checkout-btn">
+                Place Order
+            </button>
+
+        </form>
+    </div>
+
+    <!-- RIGHT: ORDER SUMMARY -->
+    <div class="checkout-summary-box">
+        <h3>Order Summary</h3>
+
+        <% let total = 0; %>
+
+        <% cart.forEach(book => { %>
+            <div class="summary-item">
+                <span><%= book.title %></span>
+                <span>₹<%= book.price %></span>
+            </div>
+            <% total += book.price; %>
+        <% }) %>
+
+        <hr>
+
+        <h2 class="total">Total: ₹<%= total %></h2>
+    </div>
+
+</div>
+
+
+</div>
+
+<%- include('partials/footer') %>
+
+<style>
+.checkout-container {
+    padding: 30px;
+}
+
+.checkout-title {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.checkout-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+.checkout-form-box,
+.checkout-summary-box {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+}
+
+.checkout-btn {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.total {
+    text-align: right;
+    color: #2c3e50;
+}
+</style>

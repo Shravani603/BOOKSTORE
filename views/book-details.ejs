@@ -1,0 +1,61 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <div class="book-detail-page">
+        <div class="book-detail-card">
+            <img src="<%= book.imageUrl %>" alt="<%= book.title %>" class="book-detail-image">
+
+            <div class="book-detail-info">
+                <h1><%= book.title %></h1>
+                <h3>By <%= book.author %></h3>
+                <p><strong>Category:</strong> <%= book.category %></p>
+                <p><strong>ISBN:</strong> <%= book.isbn %></p>
+                <p><strong>Price:</strong> ₹<%= book.price.toFixed(2) %></p>
+                <p><strong>Stock:</strong> <%= book.stock %></p>
+
+                <h3>Description</h3>
+                <p><%= book.description %></p>
+
+                <div class="book-detail-actions">
+
+                    <a href="/books" class="btn btn-secondary">Back to Books</a>
+
+                    <% if (currentUser) { %>
+
+                        <form action="/books/<%= book._id %>/buy" method="POST">
+                            <button type="submit" class="btn btn-primary">Add to Cart</button>
+                        </form>
+
+                    <% } else { %>
+
+                        <a href="/login" class="btn btn-secondary">Login to Buy</a>
+
+                    <% } %>
+
+
+                    <% if (
+                        currentUser &&
+                        (
+                            currentUser.role === 'admin' ||
+                            (book.createdBy && currentUser._id.toString() === book.createdBy.toString())
+                        )
+                    ) { %>
+
+                        <a href="/books/edit/<%= book._id %>" class="btn btn-edit">Edit</a>
+
+                        <form action="/books/<%= book._id %>?_method=DELETE" method="POST">
+                            <button class="btn btn-delete"
+                                onclick="return confirm('Are you sure you want to delete this book?')">
+                                Delete
+                            </button>
+                        </form>
+
+                    <% } %>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
